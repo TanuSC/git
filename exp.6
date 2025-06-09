@@ -1,0 +1,140 @@
+Step 1: Create a New Jenkins Job 
+1. Log into Jenkins: 
+o Open your web browser and navigate to your Jenkins URL (e.g., 
+http://localhost:8080 or your cloud instance URL). 
+o Log in with your admin credentials. 
+2. Create a New Job: 
+o On the Jenkins dashboard, click on “New Item”. 
+o Enter an Item Name: For example, Maven-CI (or Gradle-CI if you prefer 
+Gradle). 
+o Select “Freestyle project”. 
+o Click “OK”. 
+Step 2: Configure Source Code Management (SCM) 
+1. Select SCM: 
+o In the job configuration page, scroll down to the “Source Code Management” 
+section. 
+o Select “Git” (if using Git for version control). 
+2. Enter Repository Details: 
+o Repository URL: Enter the URL of your Git repository (for example, 
+https://github.com/yourusername/your-maven-project.git). 
+o Credentials: If your repository is private, click “Add” to provide the necessary 
+credentials. 
+o Optionally, specify the Branch Specifier (e.g., */main or master). 
+Step 3: Add Build Steps 
+A. For a Maven Project 
+1. Add Maven Build Step: 
+o Scroll down to “Build” and click on “Add build step”. 
+o Select “Invoke top-level Maven targets”. 
+o Goals: In the Goals field, enter:  
+o clean package 
+This command instructs Maven to clean the previous build artifacts, compile the code, run tests, and package the application into a JAR/WAR file. Optionally, set the POM File location if it is not in the default location (pom.xml).
+Pom.xml
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>JenkinsProject</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>JenkinsProject</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.testng</groupId>
+
+      <artifactId>testng</artifactId>
+      <version>7.10.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>4.25.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+           <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+          <phase>prepare-package</phase> <!-- Before packaging -->
+          <goals>
+            <goal>copy-resources</goal>
+          </goals>
+            <configuration>
+              <outputDirectory>${project.basedir}/docs</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/resources</directory>
+                  <includes>
+                    <include>**/*</include> <!-- Copy all files in src/main/resources -->
+                  </includes>
+                </resource>
+              </resources>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+</plugins>
+</build>
+</project>
+
+Now, index.html, style.css and logo.png files from docs folder is added to your Jenkins Project
+ 
+
+
+
+
+Apptest.java
+
+package org.test;
+import org.openqa.selenium.WebDriver;
+ import org.openqa.selenium.chrome.ChromeDriver;
+ import org.testng.Assert;
+ import org.testng.annotations.AfterTest;
+ import org.testng.annotations.BeforeTest;
+ import org.testng.annotations.Test;
+ import static org.testng.Assert.assertTrue;
+
+public class WebpageTest {
+    private static WebDriver driver;
+
+@BeforeTest
+public void openBrowser() throws InterruptedException {
+    driver = new ChromeDriver();
+    driver.manage().window().maximize();
+    Thread.sleep(2000);
+    driver.get("https://trisam3118.github.io/demowebsite/");// here enter static website URL from your GITHUB 
+}
+
+@Test
+public void titleValidationTest(){
+    String actualTitle = driver.getTitle();
+    String expectedTitle = "Computer Science and Engineering(Data Science)";
+    Assert.assertEquals(actualTitle, expectedTitle);
+    assertTrue(true, "Title should contain 'Computer Science and Engineering(Data Science)'");
+}
+
+@AfterTest
+public void closeBrowser() throws InterruptedException {
+    Thread.sleep(1000);
+    driver.quit();
+}
+
+}
