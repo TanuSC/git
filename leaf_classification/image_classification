@@ -1,1 +1,264 @@
+def ImageClassification(path):
+    # Import libraries
+    import os
+    import sklearn
+    import skimage
+    from pathlib import Path
+    import numpy as np
+    from sklearn.utils import Bunch
+    from skimage.io import imread
+    from skimage.transform import resize
 
+    # Description of the dataset
+    descr = "Leaf Image Classification Using Machine Learning"
+
+    def load_image_files(container_path,dimension=(224, 224, 3)):
+        image_dir=Path(container_path)
+        folders=[directory for directory in image_dir.iterdir()if directory.is_dir()]
+        categories=[fo.name for fo in folders]
+        describe="Leaf Image Classification Using Machine Learning"
+        images=[]
+        flat_data=[]
+        target=[]
+
+        for i, dir in enumerate(folders):
+            for file in dir.iterdir():
+                img=skimage.io.imread(file)
+                img_resized=resize(img,dimension, anti_aliasing=True, mode='reflect')
+                flat_data.append(img_resized.flatten())
+                images.append(img_resized)
+                target.append(i)
+        flat_data=np.array(flat_data)
+        target=np.array(target)
+        images=np.array(images)
+        return Bunch(data=flat_data, target=target, target_names=categories, images=images, DESCR=describe)
+
+    image_dataset=load_image_files(path)
+    print(image_dataset.target_names)
+
+    X=image_dataset.data
+    Y=image_dataset.target
+
+    print(X)
+    print(Y)
+
+    return(X,Y)
+# Training dataset
+def TrainData(X,Y):
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.4) # 60% training and 40% test data
+    return (X_train, X_test, y_train, y_test)
+def Algo(X_train, X_test, y_train,y_test):
+  def KNN():
+    # Import KNN classifier
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn import metrics
+
+    # Create KNN classifier object
+    knn = KNeighborsClassifier(n_neighbors=5)
+
+    # Train the model
+    knn.fit(X_train, y_train)
+
+    # Predict the response for test dataset
+    y_pred = knn.predict(X_test)
+
+    print("\nKNN classifier\n")
+
+    # Calling Metrics function
+    Metrics(y_test, y_pred)
+
+
+  def DT():
+    # Import DecisionTree classifier
+    from sklearn.tree import DecisionTreeClassifier
+  
+    # Create DecisionTree classifer object
+    dt = DecisionTreeClassifier()
+
+    # Train the model
+    dt = dt.fit(X_train,y_train)
+
+    # Predict the response for test dataset
+    y_pred = dt.predict(X_test)
+
+    print("DecisionTree classifier\n")
+
+    # Calling Metrics function
+    Metrics(y_test, y_pred)
+
+
+  def GNB():
+    # Import GaussianNaiveBayes classifier
+    from sklearn.naive_bayes import GaussianNB
+    from sklearn import metrics
+
+    # Create a GaussianNB classifier object
+    gnb = GaussianNB()
+
+    # Train the model
+    gnb.fit(X_train, y_train)
+
+    # Predict the response for test dataset
+    y_pred = gnb.predict(X_test)
+
+    print("GaussianNaiveBayes classifier\n")
+
+    # Calling Metrics function
+    Metrics(y_test, y_pred)
+
+
+  def SVM():
+    # Import SVM classifier
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.svm import SVC
+    from sklearn import metrics
+
+    # Create a SVM classifier object
+    svm = make_pipeline(StandardScaler(), SVC(gamma='auto'))
+
+    # Train the model
+    svm.fit(X_train, y_train)
+
+    # Predict the response for test dataset
+    y_pred = svm.predict(X_test)
+
+    print("SVM classifier\n")
+    
+    # Calling Metrics function
+    Metrics(y_test, y_pred)
+
+
+  def ANN():
+    # Import MLPClassifier
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.datasets import make_classification
+    from sklearn import metrics
+
+    # Create a ANN classifier and train the model
+    ann = MLPClassifier(random_state=1, max_iter=300).fit(X_train, y_train)
+
+    # Predict the response for test dataset
+    y_pred = ann.predict(X_test)
+
+    print("ANN classifier\n")
+
+    # Calling Metrics function
+    Metrics(y_test, y_pred)
+
+  # Calling ML models
+  Algorithms = [KNN, DT, GNB, SVM, ANN]
+  for i in Algorithms:
+    i()
+    print("\n")
+
+  print(f"{A}\n")
+def Metrics(y_test,y_pred):
+  # Importing modules
+  from sklearn import metrics
+  from sklearn.metrics import classification_report
+  from sklearn.metrics import confusion_matrix
+  import matplotlib.pyplot as plt
+  import scikitplot as skplt
+
+  # Accuracy score
+  a = metrics.accuracy_score(y_test, y_pred)
+  A.append(a*100)
+  print("Accuracy: ", a*100)
+  print("\nClassification report\n")
+  print(classification_report(y_test, y_pred))
+  print("\n")
+  
+  # Confusion matrix
+  print("\nConfusion matrix\n")
+  data = confusion_matrix(y_test, y_pred)
+  print(data)
+  print("\n")
+  skplt.metrics.plot_confusion_matrix(y_test, y_pred, figsize=(6,6))
+def Ranking(A):
+    # Importing modules
+    import numpy as np
+    from scipy.stats import rankdata
+
+    global Rank
+    global RankCount
+
+    PlotGraph(A)
+    arr = np.array(A)
+
+    # Normal ranking, each value has distinct rank
+    ranklist=rankdata(arr, method='ordinal')
+    print(f"Ranking of ML classifier: {ranklist}\n")
+
+    Rank.append(ranklist)
+    RankCount+=1
+    if(RankCount == n):
+        RankingList = np.sum(Rank, axis=0)
+        print("\nAggregate sum of ranking of ML models")
+        print(list(RankingList))
+
+        # Calling PlotGraph function to show the accuracy measures of various ML models
+        PlotRank(RankingList)
+def PlotGraph(A):
+    # Importing modules
+    import numpy as np
+    from scipy.stats import rankdata
+    import matplotlib.pyplot as plt
+
+    Algorithms = ['KNN', 'DT', 'GNB', 'SVM','NB']
+    Accuracy = A
+    fig = plt.figure(figsize = (10, 5))
+
+    # Creating the bar plot
+    plt.bar(Algorithms, Accuracy, color ='maroon',width = 0.4)
+    plt.ylim(0,max(Accuracy)+1)
+    plt.xlabel("ML classifiers")
+    plt.ylabel("Accuracy")
+    plt.title("Comparative analysis of various ML models")
+    plt.show()
+def PlotRank(updatedrank):
+    # Importing modules
+    import numpy as np
+    from scipy.stats import rankdata
+    import matplotlib.pyplot as plt
+
+    # Creating the dataset
+    Algorithms = ['KNN', 'DT', 'GNB', 'SVM','NB']
+    fig = plt.figure(figsize = (10, 5))
+
+    updatedranking = np.array(updatedrank)
+    finalranking=[]
+
+    # Normal ranking - each value has distinct rank
+    ordinalranklist=rankdata(updatedrank,method='ordinal')
+
+    for i in ordinalranklist:
+        finalranking.append((len(Algorithms)-(i-1)))
+
+    print(f"\nRanking of ML classifiers based on given datasets: {finalranking}")
+    print("\nBar plot of ML classifiers based on ranking")
+
+    # Creating the bar plot
+    plt.bar(Algorithms, finalranking, color ='green',width = 0.4)
+    plt.ylim(0,len(Algorithms)+1)
+    plt.xlabel("ML classification algorithms")
+    plt.ylabel("Rank")
+    plt.title("Comparative analysis on various ML classifiers")
+    plt.show()
+    print("\n")
+# Driver code
+
+# Test - Enter the directory path
+path = "/home/aayusphere/project/vegetableleaf/"
+
+A=[] # list of accuracies
+Rank=[]
+RankCount=0
+n=1
+
+# Passing the required parameters
+X,Y=ImageClassification(path)
+X_train, X_test, y_train, y_test = TrainData(X,Y)
+Algo(X_train, X_test, y_train, y_test)
+Ranking(A)
