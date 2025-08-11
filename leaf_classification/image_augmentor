@@ -1,0 +1,20 @@
+
+# Install Augmentor Module
+
+# pip install Augmentor
+
+# Importing the Augmentor Module
+import Augmentor
+
+# Point to a directory containing ground truth data
+# Augmented images with the same file names will be added as ground truth data and augmented in parallel to the original data
+p = Augmentor.Pipeline("/home/aayusphere/augmented_dataset/")
+
+# Augmentation techniques
+p.rotate(probability=1, max_left_rotation=5, max_right_rotation=5)
+p.flip_left_right(probability=0.5)
+p.zoom_random(probability=0.5, percentage_area=0.8)
+p.flip_top_bottom(probability=0.5)
+
+# Number of augmented samples
+p.sample(10)
