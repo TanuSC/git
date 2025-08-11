@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload, Update, and Display Excel Files</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        input[type="file"], input[type="text"], button {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .file-preview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Upload Section -->
+    <div class="container">
+        <h3>Upload and Update Excel Files</h3>
+
+        <!-- Upload File -->
+        <label for="uploadFile">Choose File to Upload:</label>
+        <input type="file" id="uploadFile" name="uploadFile" accept=".xls,.xlsx">
+        <button onclick="uploadFile()">Upload File</button>
+
+        <!-- Update File -->
+        <label for="updateFile">Choose File to Update:</label>
+        <input type="file" id="updateFile" name="updateFile" accept=".xls,.xlsx">
+        <label for="updateFileName">New File Name:</label>
+        <input type="text" id="updateFileName" placeholder="Enter new file name">
+        <button onclick="updateFile()">Update File</button>
+
+        <!-- File Preview -->
+        <div class="file-preview" id="file-preview">
+            <h4>File Preview:</h4>
+            <div id="previewContent">No file selected.</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Function to upload a file
+        function uploadFile() {
+            const file = document.getElementById("uploadFile").files[0];
+            if (!file) {
+                alert("Please select a file to upload.");
+                return;
+            }
+
+            // Simulating file upload
+            alert(`File "${file.name}" uploaded successfully.`);
+        }
+
+        // Function to update a file
+        function updateFile() {
+            const file = document.getElementById("updateFile").files[0];
+            const newFileName = document.getElementById("updateFileName").value.trim();
+
+            if (!file) {
+                alert("Please select a file to update.");
+                return;
+            }
+
+            if (!newFileName) {
+                alert("Please enter a new file name.");
+                return;
+            }
+
+            // Simulating file update
+            alert(`File "${file.name}" updated successfully to "${newFileName}".`);
+        }
+
+        // Function to display file preview
+        document.getElementById("updateFile").addEventListener("change", function () {
+            const file = document.getElementById("updateFile").files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Get the first sheet
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                // Convert sheet to HTML
+                const tableHtml = XLSX.utils.sheet_to_html(worksheet);
+                document.getElementById("previewContent").innerHTML = tableHtml;
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+
+</body>
+</html>
